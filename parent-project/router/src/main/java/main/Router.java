@@ -7,34 +7,40 @@ import java.util.*;
 
 public class Router{
 
-    private static void listen(Selector selector, ServerSocketChannel serverSocketChannel) throws Exception{
-        SelectionKey key = null;
+    //RETURN A SERVER SOCKET CHANNEL CONFIGURED NON BLOCKING
+    private static ServerSocketChannel createServerSocketChannel(Selector s, int port){
+        try{
+            //NEW SERVER SOCKET
+            ServerSocketChannel ssc = ServerSocketChannel.open();
+            ServerSocket ss = ssc.socket();
+            
+            //CONFIGURE NON BLOCKING
+            ssc.configureBlocking(false);
+            //OPEN ON PORT <SELECTED>
+            ss.bind(new InetSocketAddress(port));
+            //REGISTER TO THE SELECTOR
+            ssc.register(s, ssc.validOps()); //SelectionKey.OP_ACCEPT
+            return (ssc);
+        }catch(Exception e){
+            e.printStackTrace();
+            System.exit(1);
+        }
+        return (null);
+    }
+
+    //START LISTENING FOR ANY CHANGE
+    private static void startServing(Selector selector) throws Exception{
         while(true){
-            if(selector.select() <= 0)
-                continue;
-            Set<SelectionKey> selectedKeys = selector.selectedKeys();
-            Iterator<SelectionKey> iterator = selectedKeys.iterator();
-            while (iterator.hasNext()) {
-                key = (SelectionKey) iterator.next();
-                iterator.remove();
-                if (key.isAcceptable()) {
-                    SocketChannel sc = serverSocketChannel.accept();
-                    sc.configureBlocking(false);
-                    sc.register(selector, SelectionKey.OP_READ);
-                    System.out.println("Connection Accepted: " + sc.getLocalAddress() + "\n");
-                }
-                if (key.isReadable()) {
-                    SocketChannel sc = (SocketChannel) key.channel();
-                    ByteBuffer bb = ByteBuffer.allocate(1024);
-                    sc.read(bb);
-                    String result = new String(bb.array()).trim();
-                    System.out.println("Message received: " + result + " Message length= " + result.length());
-                    if (result.length() <= 0) {
-                        sc.close();
-                        System.out.println("Connection closed...");
-                        System.out.println("Server will keep running. " + "Try running another client to " + "re-establish connection");
-                    }
-                }
+            System.out.println("Waiting for connexion");
+            selector.select();
+            Iterator<SelectionKey> it = selector.selectedKeys().iterator();
+            while(it.hasNext()){
+                SelectionKey sk = it.next();
+                it.remove();
+
+                ServerSocketChannel ssc = (ServerSocketChannel)sk.channel();
+
+                Socket sock = ssc.socket().accept();
             }
         }
     }
@@ -42,16 +48,13 @@ public class Router{
     public static void main(String[] args){
         System.out.println("Router");
         try{
-            //CRETAE A NON BLOCKING SOCKET FOR THE SERVER
+            //CREATE A SELECTOR
             Selector selector = Selector.open();
-            ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
-            serverSocketChannel.configureBlocking(false);
-            //CONFIGURE IP AND PORT FOR BROKERS
-            InetAddress ip = InetAddress.getByName("localhost");
-            serverSocketChannel.bind(new InetSocketAddress(ip, 5000));
-            //REGISTER THE SELECTOR IN ACCEPT CONNEXION MODE
-            serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-            listen(selector, serverSocketChannel);
+            //CREATE A SERVER SOCKET FOR THE BROKER
+            ServerSocketChannel sscBroker = createServerSocketChannel(selector, 5000);
+            //CREATE A SERVER SOCKET FOR THE MARKET
+            ServerSocketChannel sscMarket = createServerSocketChannel(selector, 5001);
+            startServing(selector);
         }catch(Exception e){
             System.out.println(e.getMessage());
         }
