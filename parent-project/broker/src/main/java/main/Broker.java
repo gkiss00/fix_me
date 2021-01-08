@@ -4,6 +4,7 @@ import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.*;
+import java.io.*;
 
 import database.Database;
 import model.Instrument;
@@ -11,6 +12,7 @@ import dto.DataToObject;
 import utils.Fix;
 
 public class Broker {
+    private static Socket s;
     private static int Id = 1000000;
     private static List<Instrument> all_instruments;
     private static Map<Integer, Integer> my_instruments = new HashMap<>();
@@ -44,15 +46,20 @@ public class Broker {
         }
     }
 
-    private static void startFixing(){
+    private static void startFixing()throws Exception{
         Scanner scan = new Scanner(System.in);
+        BufferedReader bf = new BufferedReader(new InputStreamReader(s.getInputStream()));
+        PrintStream ps = new PrintStream(s.getOutputStream());
+
+        //get your id
+        Id = Integer.parseInt(bf.readLine());
         while(true){
             String msg = scan.nextLine();
             String args[] = msg.split("\\s+");
             if(validateInput(args)){
                 String fix_msg = Fix.stringToFix(args[0], Id, Integer.parseInt(args[1]), 
-                                                Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]));
-                System.out.println(fix_msg);
+                                                Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]));    
+                ps.println(fix_msg);
             }
             
         }
@@ -66,7 +73,8 @@ public class Broker {
             //set my starting stuff
             setMyInstruments(db);
             //Connect to the router
-            InetSocketAddress addr = new InetSocketAddress(InetAddress.getByName("localhost"), 5000);
+            s = new Socket("localhost", 5000);
+            //InetSocketAddress addr = new InetSocketAddress(InetAddress.getByName("localhost"), 5000);
             startFixing();
         }catch(Exception e){
 
