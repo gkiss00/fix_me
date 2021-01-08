@@ -6,6 +6,8 @@ import java.nio.channels.*;
 import java.util.*;
 import java.io.*;
 
+import utils.Fix;
+
 public class Server implements Runnable{
     private int id;
     private Socket s;
@@ -28,21 +30,34 @@ public class Server implements Runnable{
             ps.println(id);
         
             while(true){
-            //getMessage
-            String msg = bf.readLine();
-            System.out.println(msg);
-            //verify on checkSum;
-            //get the TargetSocket;
-            //sendMessage;
+                //getMessage
+                String msg = bf.readLine();
+                System.out.println(msg);
+                //verify on checkSum;
+                if (Fix.validateCheckSum(msg) == true){
+                    //get the TargetSocket;
+                    Socket target = getTargetSocket(msg);
+                    if (target != null){
+                        //sendMessage;
+                        PrintStream tmp_ps = new PrintStream(target.getOutputStream());
+                        tmp_ps.println(msg);
+                        tmp_ps.close();
+                    }
+                }
             }
         }catch(Exception e){
             System.out.println(e.getMessage());
         }
     }
 
-    private Socket getTargetSocket(int target){
+    private Socket getTargetSocket(String msg){
         Socket tmp = null;
+        String value = Fix.getValueByTag(56, msg);
+        int target;
 
+        if (value == null)
+            return null;
+        target = Integer.parseInt(value);
         tmp = routing_table.get(target);
         return (tmp);
     }

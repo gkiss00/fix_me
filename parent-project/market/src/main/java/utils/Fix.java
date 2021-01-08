@@ -65,7 +65,6 @@ public class Fix{
         return (checksum == msg_checksum);
     }
 
-    //GET VALUE WITH A TAG
     public static String getValueByTag(int tag, String msg){
         String args[] = msg.split("\\|");
 
