@@ -31,12 +31,21 @@ public class Broker {
 
     }
 
+    //VALIDATE MSGTYPE
+    private static boolean validateMsgType(String msgtype){
+        String tmp = msgtype.toUpperCase();
+        return (tmp.compareTo("BUY") == 0 || tmp.compareTo("SELL") == 0)
+    }
+
     //VALIDATE THE INPUT
     private static boolean validateInput(String args[]){
         if (args.length != 5)
             return false;
+        if (validateMsgType(args[0]) == false)
+            return false;
         try {
-            int test = Integer.parseInt(args[2]);
+            int test = Integer.parseInt(args[1]);
+            test = Integer.parseInt(args[2]);
             test = Integer.parseInt(args[3]);
             test = Integer.parseInt(args[4]);
             System.out.println("ok");
@@ -44,6 +53,19 @@ public class Broker {
         }catch(Exception e){
             return false;
         }
+    }
+
+    //CAN HE DO IT ??
+    private static boolean canHeTrade(String args[]){
+        String tmp = args[0].toUpperCase();
+        int instrumentId = Integer.parseInt(args[2]);
+        if (tmp.compareTo("BUY") == 0){
+            int qty;
+            int price;
+        }else{
+
+        }
+        return (true);
     }
 
     private static void startFixing()throws Exception{
@@ -61,7 +83,6 @@ public class Broker {
                                                 Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]));    
                 ps.println(fix_msg);
             }
-            
         }
     }
 
