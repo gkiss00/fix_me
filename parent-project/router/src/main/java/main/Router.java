@@ -11,7 +11,8 @@ import server.Server;
 public class Router{
     private static int id = 100000;
     private static Map<Integer, Socket> routing_table = new HashMap<Integer, Socket>();
-    private static ExecutorService executor_service = Executors.newFixedThreadPool(4);
+    private static ExecutorService executor_service = Executors.newFixedThreadPool(10);
+    private static List<Server> server_list = new ArrayList<Server>();
 
     //RETURN A SERVER SOCKET CHANNEL CONFIGURED NON BLOCKING
     private static ServerSocketChannel createServerSocketChannel(Selector s, int port){
@@ -34,10 +35,18 @@ public class Router{
         return (null);
     }
 
+    private static void advert(Socket socket){
+        if (socket.getPort() == 5000){
+            System.out.println("Broker " + id + " connected");
+        }else{
+            System.out.println("Market " + id + " connected");
+        }
+    }
+
     //START LISTENING FOR ANY CHANGE
     private static void startServing(Selector selector) throws Exception{
+        System.out.println("Waiting for connexion");
         while(true){
-            System.out.println("Waiting for connexion");
             selector.select();
             //if someone try to connect
             Iterator<SelectionKey> it = selector.selectedKeys().iterator();
@@ -49,11 +58,13 @@ public class Router{
                 ServerSocketChannel ssc = (ServerSocketChannel)sk.channel();
                 //Accept the entring connexion
                 Socket sock = ssc.socket().accept();
+                advert(sock);
                 //Register the sockect into the routing table
                 int tmp = getNextId();
                 routing_table.put(tmp, sock);
                 //START A SERVER WITH THE SOCKET...
                 Server server = new Server(sock, routing_table, tmp);
+                server_list.add(server);
                 executor_service.submit(server);
             }
         }

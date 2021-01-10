@@ -28,21 +28,25 @@ public class Server implements Runnable{
 
             //Communicate the Id
             ps.println(id);
-        
+            //start chatting
             while(true){
                 //getMessage
                 String msg = bf.readLine();
                 System.out.println(msg);
                 //verify on checkSum;
-                if (Fix.validateCheckSum(msg) == true){
+                if (msg != null && Fix.validateCheckSum(msg) == true){
                     //get the TargetSocket;
                     Socket target = getTargetSocket(msg);
                     if (target != null){
                         //sendMessage;
                         PrintStream tmp_ps = new PrintStream(target.getOutputStream());
                         tmp_ps.println(msg);
-                        tmp_ps.close();
+                        //tmp_ps.close();
+                    }else{
+                        System.out.println("Target not found");
                     }
+                }else{
+                    System.out.println("Unvalide checksum");
                 }
             }
         }catch(Exception e){
