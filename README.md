@@ -8,6 +8,8 @@ mysql
 
 ### Installation
 
+sudo mysql -u root
+alter user 'root'@'localhost' identified with mysql_native_password by 'root';
 Install the db
 cd parent-project
 mvn clean package
