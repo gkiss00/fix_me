@@ -38,7 +38,7 @@ public class Router{
     }
 
     private static void advert(Socket socket){
-        System.out.println("Client " + id + " connected");
+        System.out.println("Client " + (id + 1) + " connected");
     }
 
     //START LISTENING FOR ANY CHANGE

@@ -52,6 +52,7 @@ public class Server implements Runnable{
                 if (msg != null && Fix.validateCheckSum(msg) == true){
                     //get the TargetSocket;
                     Socket target = getTargetSocket(msg);
+                    //insert into db
                     db.insertTransaction(msg);
                     if (target != null && valideTarget(target)){
                         //sendMessage;
@@ -67,6 +68,7 @@ public class Server implements Runnable{
                 }
             }
         }catch(Exception e){
+            System.out.println("Exception occured");
             System.out.println(e.getMessage());
         }
     }
