@@ -90,7 +90,15 @@ public class Broker {
     }
 
     private static void getResponse(String action, String args[]) throws Exception{
-        String ans = bf.readLine();
+        String ans;
+
+        //if server closed
+        if (bf.isReady() == false){
+            return ;
+        }
+        ans = bf.readLine();
+        if(ans.compareTo("NF") == 0)
+            return ;
         String msgType = Fix.getValueByTag(35, ans);
         int instruId = Integer.parseInt(args[2]);
         int qty = Integer.parseInt(args[3]);
@@ -126,9 +134,11 @@ public class Broker {
         System.out.println("Wallet : " + wallet);
         //start fixing
         while(true){
+            //get input
             String msg = scan.nextLine();
             String args[] = msg.split("\\s+");
             if(validateInput(args)){
+                //to fix
                 String fix_msg = Fix.stringToFix(args[0].toUpperCase(), Id, Integer.parseInt(args[1]), 
                                 Integer.parseInt(args[2]), Integer.parseInt(args[3]), getPrice(Integer.parseInt(args[2])));
                 ps.println(fix_msg);

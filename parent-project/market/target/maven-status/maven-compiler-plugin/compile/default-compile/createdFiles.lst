@@ -1,0 +1,5 @@
+utils/Fix.class
+main/Market.class
+database/Database.class
+model/Instrument.class
+dto/DataToObject.class

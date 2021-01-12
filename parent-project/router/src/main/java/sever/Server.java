@@ -30,9 +30,17 @@ public class Server implements Runnable{
             ps.println(id);
             //start chatting
             while(true){
+                //If the socket closed
+                if (bf.ready() == false){
+                    s.close();
+                    routing_table.remove(id);
+                    return ;
+                }
                 //getMessage
                 String msg = bf.readLine();
                 System.out.println(msg);
+                System.out.println("S closed ; " + s.isClosed());
+                System.out.println("Bf ready : " + bf.ready());
                 //verify on checkSum;
                 if (msg != null && Fix.validateCheckSum(msg) == true){
                     //get the TargetSocket;
@@ -44,6 +52,7 @@ public class Server implements Runnable{
                         //tmp_ps.close();
                     }else{
                         System.out.println("Target not found");
+                        ps.println("NF");
                     }
                 }else{
                     System.out.println("Unvalide checksum");

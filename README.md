@@ -1,7 +1,5 @@
 # fix_me
 
-## FIX
-
 * Financial Information eXchange
 
 ### Needed
