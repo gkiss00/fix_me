@@ -53,7 +53,7 @@ public class Server implements Runnable{
                     //get the TargetSocket;
                     Socket target = getTargetSocket(msg);
                     db.insertTransaction(msg);
-                    if (target != null){
+                    if (target != null && valideTarget(target)){
                         //sendMessage;
                         PrintStream tmp_ps = new PrintStream(target.getOutputStream());
                         tmp_ps.println(msg);
@@ -81,5 +81,9 @@ public class Server implements Runnable{
         target = Integer.parseInt(value);
         tmp = routing_table.get(target);
         return (tmp);
+    }
+
+    private boolean valideTarget(Socket target){
+        return (s.getPort() != target.getPort());
     }
 }

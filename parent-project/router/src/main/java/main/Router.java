@@ -38,11 +38,7 @@ public class Router{
     }
 
     private static void advert(Socket socket){
-        if (socket.getPort() == 5000){
-            System.out.println("Broker " + id + " connected");
-        }else{
-            System.out.println("Market " + id + " connected");
-        }
+        System.out.println("Client " + id + " connected");
     }
 
     //START LISTENING FOR ANY CHANGE
