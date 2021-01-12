@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.0.2
+-- version 5.0.3
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : jeu. 07 jan. 2021 à 19:35
--- Version du serveur :  10.4.13-MariaDB
--- Version de PHP : 7.4.8
+-- Généré le : mar. 12 jan. 2021 à 15:09
+-- Version du serveur :  8.0.19
+-- Version de PHP : 7.2.34
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -17,11 +17,6 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
-DROP DATABASE if exists fix_me;
-
-CREATE DATABASE fix_me;
-
-USE fix_me;
 --
 -- Base de données : `fix_me`
 --
@@ -33,10 +28,10 @@ USE fix_me;
 --
 
 CREATE TABLE `instruments` (
-  `id` mediumint(9) NOT NULL,
-  `name` char(30) NOT NULL,
-  `price` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `id` int NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `price` int DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Déchargement des données de la table `instruments`
@@ -58,14 +53,9 @@ INSERT INTO `instruments` (`id`, `name`, `price`) VALUES
 --
 
 CREATE TABLE `transactions` (
-  `id` mediumint(9) NOT NULL,
-  `brokerId` int(11) DEFAULT NULL,
-  `marketId` int(11) DEFAULT NULL,
-  `instrumentId` mediumint(9) NOT NULL,
-  `qty` int(11) DEFAULT NULL,
-  `price` int(11) DEFAULT NULL,
-  `timing` char(30) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `id` int NOT NULL,
+  `msg` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Index pour les tables déchargées
@@ -81,8 +71,7 @@ ALTER TABLE `instruments`
 -- Index pour la table `transactions`
 --
 ALTER TABLE `transactions`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `FM_InstrumentTransaction` (`instrumentId`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- AUTO_INCREMENT pour les tables déchargées
@@ -92,23 +81,13 @@ ALTER TABLE `transactions`
 -- AUTO_INCREMENT pour la table `instruments`
 --
 ALTER TABLE `instruments`
-  MODIFY `id` mediumint(9) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT pour la table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` mediumint(9) NOT NULL AUTO_INCREMENT;
-
---
--- Contraintes pour les tables déchargées
---
-
---
--- Contraintes pour la table `transactions`
---
-ALTER TABLE `transactions`
-  ADD CONSTRAINT `FM_InstrumentTransaction` FOREIGN KEY (`instrumentId`) REFERENCES `instruments` (`id`);
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

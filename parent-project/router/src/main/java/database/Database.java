@@ -20,7 +20,7 @@ public class Database{
 
     //*****************************************************************************************
     //*****************************************************************************************
-    //INSTUMENT
+    //INSTRUMENT
     //*****************************************************************************************
     //*****************************************************************************************
 
@@ -39,27 +39,17 @@ public class Database{
     //*****************************************************************************************
     //*****************************************************************************************
 
-    public void insertTransaction(int brokerId, int marketId, int instrumentId, int qty, int price, String date) throws Exception{
-        String request = getRequest(brokerId, marketId, instrumentId, qty, price, date);
+    public void insertTransaction(String fix_msg) throws Exception{
+        String request = getRequest(fix_msg);
 
         Statement statement = connection.createStatement();
         statement.executeUpdate(request);
     }
 
-    private String getRequest(int brokerId, int marketId, int instrumentId, int qty, int price, String date){
-        String request = "INSERT INTO transactions VALUES (0, ";
-        request += ITOS(brokerId);
-        request += ", ";
-        request += ITOS(marketId);
-        request += ", ";
-        request += ITOS(instrumentId);
-        request += ", ";
-        request += ITOS(qty);
-        request += ", ";
-        request += ITOS(price);
-        request += ", '";
-        request += date;
-        request += "')";
+    private String getRequest(String fix_msg){
+        String request = "INSERT INTO transactions VALUES (0, \"";
+        request += fix_msg;
+        request += "\")";
         return request;
     }
 
