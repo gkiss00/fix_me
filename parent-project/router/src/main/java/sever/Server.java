@@ -7,44 +7,52 @@ import java.util.*;
 import java.io.*;
 
 import utils.Fix;
+import database.Database;
 
 public class Server implements Runnable{
     private int id;
     private Socket s;
     private int port;
     private Map<Integer, Socket> routing_table;
+    private Database db;
+    private BufferedReader bf;
+    private PrintStream ps;
 
-    public Server(Socket s, Map<Integer, Socket> rt, int id){
+    public Server(Socket s, Map<Integer, Socket> rt, int id, Database db){
         this.s = s;
         this.port = s.getLocalPort();
         this.routing_table = rt;
         this.id = id;
+        this.db = db;
+        try{
+            bf = new BufferedReader(new InputStreamReader(s.getInputStream()));
+            ps = new PrintStream(s.getOutputStream());
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+        }
     }
 
     public void run(){
         try {
-            BufferedReader bf = new BufferedReader(new InputStreamReader(s.getInputStream()));
-            PrintStream ps = new PrintStream(s.getOutputStream());
-
             //Communicate the Id
             ps.println(id);
             //start chatting
             while(true){
-                //If the socket closed
-                if (bf.ready() == false){
+                //getMessage
+                String msg = bf.readLine();
+                System.out.println(msg);
+                //if the client is done return
+                if (msg == null){
+                    System.out.println("Client " + id + " disconnected");
                     s.close();
                     routing_table.remove(id);
                     return ;
                 }
-                //getMessage
-                String msg = bf.readLine();
-                System.out.println(msg);
-                System.out.println("S closed ; " + s.isClosed());
-                System.out.println("Bf ready : " + bf.ready());
                 //verify on checkSum;
                 if (msg != null && Fix.validateCheckSum(msg) == true){
                     //get the TargetSocket;
                     Socket target = getTargetSocket(msg);
+                    db.insertTransaction(msg);
                     if (target != null){
                         //sendMessage;
                         PrintStream tmp_ps = new PrintStream(target.getOutputStream());

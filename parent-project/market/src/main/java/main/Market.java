@@ -104,6 +104,12 @@ public class Market {
             String msgType;
             //listen for msg
             String msg = bf.readLine();
+            //if server is done exit
+            if (msg == null){
+                System.out.println("Server closed");
+                s.close();
+                System.exit(1);
+            }
             //check if possible
             if (msg != null){
                 if(isTradePossible(msg) == true)

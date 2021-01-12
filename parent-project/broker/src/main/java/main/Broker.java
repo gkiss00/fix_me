@@ -92,11 +92,13 @@ public class Broker {
     private static void getResponse(String action, String args[]) throws Exception{
         String ans;
 
-        //if server closed
-        if (bf.isReady() == false){
-            return ;
-        }
+        //if server is done exit
         ans = bf.readLine();
+        if (ans == null){
+            System.out.println("Server closed");
+            s.close();
+            System.exit(1);
+        }
         if(ans.compareTo("NF") == 0)
             return ;
         String msgType = Fix.getValueByTag(35, ans);

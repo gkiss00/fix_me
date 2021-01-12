@@ -7,9 +7,11 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import server.Server;
+import database.Database;
 
 public class Router{
     private static int id = 100000;
+    private static Database db = new Database();
     private static Map<Integer, Socket> routing_table = new HashMap<Integer, Socket>();
     private static ExecutorService executor_service = Executors.newFixedThreadPool(10);
     private static List<Server> server_list = new ArrayList<Server>();
@@ -63,7 +65,7 @@ public class Router{
                 int tmp = getNextId();
                 routing_table.put(tmp, sock);
                 //START A SERVER WITH THE SOCKET...
-                Server server = new Server(sock, routing_table, tmp);
+                Server server = new Server(sock, routing_table, tmp, db);
                 server_list.add(server);
                 executor_service.submit(server);
             }
