@@ -20,6 +20,12 @@ public class Broker {
     private static Map<Integer, Integer> my_instruments = new HashMap<>();
     private static int wallet = 2000;
 
+    //***********************************************************************
+    //***********************************************************************
+    //UTILS
+    //***********************************************************************
+    //***********************************************************************
+
     //SET STARTER INSTUMENTS
     private static void setMyInstruments(Database db) throws Exception{
         Random rand = new Random();
@@ -32,6 +38,7 @@ public class Broker {
         }
     }
 
+    //get price of an intrument -1 if doesn't exist
     private static int getPrice(int id){
         for (int i = 0; i < all_instruments.size(); ++i){
             if (all_instruments.get(i).getId() == id){
@@ -41,89 +48,135 @@ public class Broker {
         return (-1);
     }
 
-    //VALIDATE MSGTYPE
-    private static boolean validateMsgType(String msgtype){
-        String tmp = msgtype.toUpperCase();
-        return (tmp.compareTo("BUY") == 0 || tmp.compareTo("SELL") == 0);
-    }
+    
+    //***********************************************************************
+    //***********************************************************************
+    //VALIDATION
+    //***********************************************************************
+    //***********************************************************************
 
     //VALIDATE THE INPUT
     private static boolean validateInput(String args[]){
+        //must have 4 args
         if (args.length != 4)
             return false;
+        //must be SELL or BUY
         if (validateMsgType(args[0]) == false)
             return false;
+        //must be 3 numbers
         try {
+            //target id
             int test = Integer.parseInt(args[1]);
+            //intrument id
             test = Integer.parseInt(args[2]);
-            if (getPrice(test) < 0)
-                return false;
+            //qty
             test = Integer.parseInt(args[3]);
+            //check if instrument exist
+            if (getPrice(Integer.parseInt(args[2])) < 0)
+                return false;
+            //check if he can trade
+            if (canHeTrade(args) == false)
+                return (false);
             return true;
         }catch(Exception e){
             return false;
         }
     }
 
+    //VALIDATE MSGTYPE
+    private static boolean validateMsgType(String msgtype){
+        String tmp = msgtype.toUpperCase();
+        return (tmp.compareTo("BUY") == 0 || tmp.compareTo("SELL") == 0);
+    }
+
     //CAN HE DO IT ??
     private static boolean canHeTrade(String args[]){
-        String tmp = args[0].toUpperCase();
+        //get the action type
+        String action = args[0].toUpperCase();
+        //get the instument to trade
         int instrumentId = Integer.parseInt(args[2]);
+        //get qty
         int qty = Integer.parseInt(args[2]);
+        //get price
         int price = getPrice(instrumentId);
 
-        Integer instrument = my_instruments.get(instrumentId);
-
-        //check if instrument exists
-        if (price < 0)
-            return false;
-        if (tmp.compareTo("BUY") == 0){
-            if (price * qty > wallet)
-                return false;
-        }else{
+        
+        //if u try to sell
+        if(action.compareTo("SELL") == 0){
+            //check if u get the instument in your inventory
+            Integer instrument = my_instruments.get(instrumentId);
             if (instrument == null)
-                return false;
+                return (false);
+            //check if u get enough to sell
             if (qty > instrument)
-                return false;
+                return (false);
+            return (true);
+        //if u try to buy
+        }else{
+            if (price * qty > wallet)
+                return (false);
+            return (true);
         }
-        return (true);
     }
+
+    //***********************************************************************
+    //***********************************************************************
+    //GET RESPONSE
+    //***********************************************************************
+    //***********************************************************************
 
     private static void getResponse(String action, String args[]) throws Exception{
         String ans;
 
-        //if server is done exit
         ans = bf.readLine();
+        //if server is done exit
         if (ans == null){
             System.out.println("Server closed");
             s.close();
             System.exit(1);
         }
+        //if target no found
         if(ans.compareTo("NF") == 0)
             return ;
+        //get answer Exeuted or Rejected
         String msgType = Fix.getValueByTag(35, ans);
+        //get instrument id
         int instruId = Integer.parseInt(args[2]);
+        //get qty
         int qty = Integer.parseInt(args[3]);
-
-        Integer instru = my_instruments.get(instruId);
 
         if (msgType.compareTo("Rejected") == 0)
             return ;
-        //update stock
+        //if sell Exeuted
         if (action.compareTo("SELL") == 0){
+            //get the instrument
+            Integer instru = my_instruments.get(instruId);
+            //update qty in inventory
             if (instru == qty)
                 my_instruments.remove(instruId);
             else
                 my_instruments.put(instruId, instru - qty);
+            //uodate wallet
             wallet += (qty * getPrice(instruId));
+        //if buy Exeuted
         }else{
+            //get the instrument
+            Integer instru = my_instruments.get(instruId);
+            //update qty in inventory
             if (instru != null)
                 my_instruments.put(instruId, instru + qty);
             else
                 my_instruments.put(instruId, qty);
+            //update wallet
             wallet -= (qty * getPrice(instruId));
         }
     }
+
+    //***********************************************************************
+    //***********************************************************************
+    //SEND MESSAGE
+    //***********************************************************************
+    //***********************************************************************
 
     private static void startFixing()throws Exception{
         Scanner scan = new Scanner(System.in);
@@ -154,6 +207,12 @@ public class Broker {
             }
         }
     }
+
+    //***********************************************************************
+    //***********************************************************************
+    //START
+    //***********************************************************************
+    //***********************************************************************
 
     public static void main(String[] args){
         System.out.println("Broker");
