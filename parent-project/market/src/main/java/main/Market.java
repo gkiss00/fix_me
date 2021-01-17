@@ -86,7 +86,6 @@ public class Market {
         String fix_message;
 
         fix_message = Fix.stringToFix(msgType, Id, targetId, instrumentId, qty, price);
-        System.out.println(fix_message);
         ps.println(fix_message);
     }
 

@@ -14,14 +14,16 @@ public class Server implements Runnable{
     private Socket s;
     private int port;
     private Map<Integer, Socket> routing_table;
+    private Map<Integer, Integer> client_type;
     private Database db;
     private BufferedReader bf;
     private PrintStream ps;
 
-    public Server(Socket s, Map<Integer, Socket> rt, int id, Database db){
+    public Server(Socket s, Map<Integer, Socket> rt, Map<Integer, Integer> ct, int id, Database db){
         this.s = s;
         this.port = s.getLocalPort();
         this.routing_table = rt;
+        this.client_type = ct;
         this.id = id;
         this.db = db;
         try{

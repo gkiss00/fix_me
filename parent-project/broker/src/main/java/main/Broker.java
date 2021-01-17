@@ -48,6 +48,11 @@ public class Broker {
         return (-1);
     }
 
+    private static boolean badRequest(String msg){
+        System.out.println(msg);
+        return (false);
+    }
+
     
     //***********************************************************************
     //***********************************************************************
@@ -59,10 +64,10 @@ public class Broker {
     private static boolean validateInput(String args[]){
         //must have 4 args
         if (args.length != 4)
-            return false;
+            return badRequest("Your message must contain 4 arguments");
         //must be SELL or BUY
         if (validateMsgType(args[0]) == false)
-            return false;
+            return badRequest("Your messageType must be sell or buy");
         //must be 3 numbers
         try {
             //target id
@@ -73,13 +78,13 @@ public class Broker {
             test = Integer.parseInt(args[3]);
             //check if instrument exist
             if (getPrice(Integer.parseInt(args[2])) < 0)
-                return false;
+                return badRequest("The instrument you ar trying to sell/buy doesn't exist");
             //check if he can trade
             if (canHeTrade(args) == false)
-                return (false);
+                return false;
             return true;
         }catch(Exception e){
-            return false;
+            return badRequest("Your message must contain 3 numbers");
         }
     }
 
@@ -96,7 +101,7 @@ public class Broker {
         //get the instument to trade
         int instrumentId = Integer.parseInt(args[2]);
         //get qty
-        int qty = Integer.parseInt(args[2]);
+        int qty = Integer.parseInt(args[3]);
         //get price
         int price = getPrice(instrumentId);
 
@@ -106,15 +111,15 @@ public class Broker {
             //check if u get the instument in your inventory
             Integer instrument = my_instruments.get(instrumentId);
             if (instrument == null)
-                return (false);
+                return badRequest("You don't own this instrument");
             //check if u get enough to sell
             if (qty > instrument)
-                return (false);
+                return badRequest("You don't own enought of this instrument");
             return (true);
         //if u try to buy
         }else{
             if (price * qty > wallet)
-                return (false);
+                return badRequest("You don't get enought money to do this");
             return (true);
         }
     }
@@ -196,14 +201,13 @@ public class Broker {
                 //to fix
                 String fix_msg = Fix.stringToFix(args[0].toUpperCase(), Id, Integer.parseInt(args[1]), 
                                 Integer.parseInt(args[2]), Integer.parseInt(args[3]), getPrice(Integer.parseInt(args[2])));
+                //send fix to server
                 ps.println(fix_msg);
                 //recieve response
                 getResponse(args[0].toUpperCase(), args);
                 //show new stock
                 System.out.println("New stock : " + my_instruments);
                 System.out.println("Wallet : " + wallet);
-            }else{
-                System.out.println("Unvalide message");
             }
         }
     }
