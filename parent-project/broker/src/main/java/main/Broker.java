@@ -84,10 +84,16 @@ public class Broker {
         try {
             //target id
             int test = Integer.parseInt(args[1]);
+            if (test < 0)
+                return badRequest("Numbers can't be negatives");
             //intrument id
             test = Integer.parseInt(args[2]);
+            if (test < 0)
+                return badRequest("Numbers can't be negatives");
             //qty
             test = Integer.parseInt(args[3]);
+            if (test < 0)
+                return badRequest("Numbers can't be negatives");
             //check if instrument exist
             if (getPrice(Integer.parseInt(args[2])) < 0)
                 return badRequest("The instrument you ar trying to sell/buy doesn't exist");
