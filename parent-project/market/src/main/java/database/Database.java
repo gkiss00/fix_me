@@ -32,7 +32,7 @@ public class Database{
     }
 
     public void updateClient(int client_id, int pending) throws Exception{
-        String request = "UPDATE clients SET pending=" + ITOS(pending) + " WHERE client_id=" + ITOS(client_id);
+        String request = "UPDATE clients SET pending=" + ITOS(pending) + " WHERE id=" + ITOS(client_id);
 
         Statement statement = connection.createStatement();
         statement.executeUpdate(request);

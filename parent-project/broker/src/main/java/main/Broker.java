@@ -16,6 +16,7 @@ public class Broker {
     private static BufferedReader bf;
     private static PrintStream ps;
     private static int Id;
+    private static Database db = new Database();
     private static List<Instrument> all_instruments;
     private static Map<Integer, Integer> my_instruments = new HashMap<>();
     private static int wallet = 2000;
@@ -174,6 +175,7 @@ public class Broker {
             //update wallet
             wallet -= (qty * getPrice(instruId));
         }
+        db.updateClient(Id, 0);
     }
 
     //***********************************************************************
@@ -199,6 +201,7 @@ public class Broker {
                 String fix_msg = Fix.stringToFix(args[0].toUpperCase(), Id, Integer.parseInt(args[1]), 
                                 Integer.parseInt(args[2]), Integer.parseInt(args[3]), getPrice(Integer.parseInt(args[2])));
                 //send fix to server
+                db.updateClient(Id, 1);
                 ps.println(fix_msg);
                 //recieve response
                 getResponse(args[0].toUpperCase(), args);
@@ -227,6 +230,8 @@ public class Broker {
         ps.println(desired_id);
         //get your id
         Id = Integer.parseInt(bf.readLine());
+        if (Id != desired_id)
+            db.insertClient(Id, 5000);
     }
 
     //***********************************************************************
@@ -238,8 +243,6 @@ public class Broker {
     public static void main(String[] args){
         System.out.println("Broker");
         try{
-            //Get the connexion with the database
-            Database db = new Database();
             //set my starting stuff
             setMyInstruments(db);
             //Connect to the router
