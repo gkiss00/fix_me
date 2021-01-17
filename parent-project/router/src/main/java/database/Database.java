@@ -25,7 +25,14 @@ public class Database{
     //*****************************************************************************************
 
     public void insertClient(int client_id, int type) throws Exception{
-        String request = "INSERT INTO clients VALUES (" + ITOS(client_id) + ", " + ITOS(type) + ")";
+        String request = "INSERT INTO clients VALUES (" + ITOS(client_id) + ", " + ITOS(type) + ", 0)";
+
+        Statement statement = connection.createStatement();
+        statement.executeUpdate(request);
+    }
+
+    public void updateClient(int client_id, int pending) throws Exception{
+        String request = "UPDATE clients SET pending=" + ITOS(pending) + " WHERE client_id=" + ITOS(client_id);
 
         Statement statement = connection.createStatement();
         statement.executeUpdate(request);

@@ -35,7 +35,8 @@ USE fix_me;
 
 CREATE TABLE `clients` (
   `id` int NOT NULL,
-  `type` int NOT NULL
+  `type` int NOT NULL,
+  `pending` int
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 -- --------------------------------------------------------

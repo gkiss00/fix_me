@@ -101,7 +101,8 @@ public class Router{
     public static void main(String[] args){
         System.out.println("Router");
         try{
-            db.getMaxId();
+            //get the next Id
+            id = (db.getMaxId() < 100000) ? (100000) : db.getMaxId();
             //CREATE A SELECTOR
             Selector selector = Selector.open();
             //CREATE A SERVER SOCKET FOR THE BROKER

@@ -44,6 +44,18 @@ public class Server implements Runnable{
     //***********************************************************************
     //***********************************************************************
 
+    private void sendPendingMessage(){
+        for (int i = 0; i < msg_pending.size(); ++i){
+            String tmp = msg_pending.get(i);
+            int targetId = Integer.parseInt(Fix.getValueByTag(56, tmp));
+            if (targetId == id){
+                ps.println(tmp);
+                break;
+            }
+        }
+    }
+
+    //set good id
     private void setGoodClient() throws Exception{
         int type = client_type.get(id); //5000 if broker
 
@@ -80,6 +92,8 @@ public class Server implements Runnable{
         try {
             //SetClient
             setGoodClient();
+            //check if pending
+            sendPendingMessage();
             //start chatting
             while(true){
                 //getMessage
