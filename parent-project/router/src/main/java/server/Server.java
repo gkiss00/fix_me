@@ -47,13 +47,19 @@ public class Server implements Runnable{
     //***********************************************************************
 
     private void sendPendingMessage(){
+        int save = -1;
         for (int i = 0; i < msg_pending.size(); ++i){
             String tmp = msg_pending.get(i);
             int targetId = Integer.parseInt(Fix.getValueByTag(56, tmp));
+            System.out.println(targetId);
             if (targetId == id){
+                save = i;
                 ps.println(tmp);
                 break;
             }
+        }
+        if (save != -1){
+            msg_pending.remove(save);
         }
     }
 
@@ -66,6 +72,7 @@ public class Server implements Runnable{
             if (diconnected_broker.contains(desired_id)){
                 routing_table.remove(id);
                 client_type.remove(id);
+                diconnected_broker.remove((Integer)desired_id);
                 routing_table.put(desired_id, s);
                 client_type.put(desired_id, type);
                 id = desired_id;

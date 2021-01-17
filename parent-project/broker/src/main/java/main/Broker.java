@@ -30,8 +30,6 @@ public class Broker {
     //SET STARTER INSTUMENTS
     private static void setMyInstruments() throws Exception{
         Random rand = new Random();
-        //Get all instruments
-        all_instruments = DataToObject.getAllInstruments(db.getAllInstruments());
         //set my_instruments
         for (int i = 0; i < 5; ++i){
             int pos = rand.nextInt(all_instruments.size());
@@ -49,6 +47,7 @@ public class Broker {
 
     private static void getMyInstruments() throws Exception{
         my_instruments = DataToObject.getClientInstruments(db.getClientInstruments(Id));
+        wallet = db.getClientWallet(Id);
     }
 
     //get price of an intrument -1 if doesn't exist
@@ -142,6 +141,58 @@ public class Broker {
     //***********************************************************************
     //***********************************************************************
 
+    private static void getPendingMessage() throws Exception{
+        int pending = db.getClientPending(Id);
+
+        if (pending != 0){
+            String ans = bf.readLine();
+
+            if(ans.compareTo("NF") == 0)
+                return ;
+            String msgType = Fix.getValueByTag(35, ans);
+            int instruId = Integer.parseInt(Fix.getValueByTag(58, ans));
+            int qty = Integer.parseInt(Fix.getValueByTag(53, ans));
+            int price = Integer.parseInt(Fix.getValueByTag(44, ans));
+
+            if (msgType.compareTo("Rejected") == 0)
+                return ;
+            //if was buying
+            if (pending == 2){
+                //get the instrument
+                Integer instru = my_instruments.get(instruId);
+                //update qty in inventory
+                if (instru != null){
+                    my_instruments.put(instruId, instru + qty);
+                    db.updateClientIntrument(Id, instruId, instru + qty);
+                }else{
+                    my_instruments.put(instruId, qty);
+                    db.insertClientIntrument(Id, instruId, qty);
+                }
+                //update wallet
+                wallet -= (qty * getPrice(instruId));
+            //if was selling
+            }else{
+                //get the instrument
+                Integer instru = my_instruments.get(instruId);
+                //update qty in inventory
+                if (instru == qty){
+                    my_instruments.remove(instruId);
+                    db.removeClientIntrument(Id, instruId);
+                }else{
+                    my_instruments.put(instruId, instru - qty);
+                    db.updateClientIntrument(Id, instruId, instru - qty);
+                }
+                //update wallet
+                wallet += (qty * getPrice(instruId));
+            }
+            db.updateClientWallet(Id, wallet);
+            db.updateClientPending(Id, 0);
+        }
+        //show new stock
+        System.out.println("New stock : " + my_instruments);
+        System.out.println("Wallet : " + wallet);
+    }
+
     private static void getResponse(String action, String args[]) throws Exception{
         String ans;
 
@@ -176,7 +227,7 @@ public class Broker {
                 my_instruments.put(instruId, instru - qty);
                 db.updateClientIntrument(Id, instruId, instru - qty);
             }
-            //uodate wallet
+            //update wallet
             wallet += (qty * getPrice(instruId));
         //if buy Exeuted
         }else{
@@ -220,7 +271,10 @@ public class Broker {
                 String fix_msg = Fix.stringToFix(args[0].toUpperCase(), Id, Integer.parseInt(args[1]), 
                                 Integer.parseInt(args[2]), Integer.parseInt(args[3]), getPrice(Integer.parseInt(args[2])));
                 //send fix to server
-                db.updateClientPending(Id, 1);
+                if (args[0].toUpperCase().compareTo("SELL") == 0)
+                    db.updateClientPending(Id, 1);
+                else
+                    db.updateClientPending(Id, 2);
                 ps.println(fix_msg);
                 //recieve response
                 getResponse(args[0].toUpperCase(), args);
@@ -254,6 +308,7 @@ public class Broker {
             setMyInstruments();
         }else{
             getMyInstruments();
+            getPendingMessage();
         }
     }
 
@@ -266,6 +321,8 @@ public class Broker {
     public static void main(String[] args){
         System.out.println("Broker");
         try{
+            //Get all instruments
+            all_instruments = DataToObject.getAllInstruments(db.getAllInstruments());
             //Connect to the router
             s = new Socket("localhost", 5000);
             bf = new BufferedReader(new InputStreamReader(s.getInputStream()));

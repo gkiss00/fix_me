@@ -48,6 +48,17 @@ public class Database{
         statement.executeUpdate(request);
     }
 
+    public int getClientPending(int client_id)throws Exception{
+        ResultSet res;
+        int pending = 0;
+        String request = "SELECT pending FROM clients WHERE id=" + ITOS(client_id);
+        Statement statement = connection.createStatement();
+        res = statement.executeQuery(request);
+        if (res.next())
+            pending = res.getInt(1);
+        return (pending);
+    }
+
     public void updateClientPending(int client_id, int pending) throws Exception{
         String request = "UPDATE clients SET pending=" + ITOS(pending) + " WHERE id=" + ITOS(client_id);
 
@@ -62,7 +73,7 @@ public class Database{
         Statement statement = connection.createStatement();
         res = statement.executeQuery(request);
         if (res.next())
-            System.out.println(res.getInt(1));
+            wallet = res.getInt(1);
         return (wallet);
     }
 
@@ -117,7 +128,7 @@ public class Database{
     }
 
     public void updateClientIntrument(int client_id, int instrument_id, int qty) throws Exception{
-        String request = "UPDATE clientsinstruments SET qty=" + ITOS(qty) + " WHERE client_id=" + ITOS(client_id) + " and instrument_id=" + ITOS(instrument_id);
+        String request = "UPDATE clientsinstruments SET quantity=" + ITOS(qty) + " WHERE client_id=" + ITOS(client_id) + " and instrument_id=" + ITOS(instrument_id);
         
         Statement statement = connection.createStatement();
         statement.executeUpdate(request);

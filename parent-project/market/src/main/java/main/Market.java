@@ -109,6 +109,7 @@ public class Market {
                 s.close();
                 System.exit(1);
             }
+            Thread.sleep(2000);
             //check if possible
             if (msg != null){
                 if(isTradePossible(msg) == true)
