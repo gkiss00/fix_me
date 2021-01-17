@@ -25,7 +25,7 @@ public class DataToObject {
     public static Map<Integer, Integer> getClientInstruments(ResultSet res) throws Exception{
         Map<Integer, Integer> instruments = new HashMap<Integer, Integer>();
         while(res.next()){
-            int id = res.getInt("intrument_id");
+            int id = res.getInt("instrument_id");
             int qty = res.getInt("quantity");
             instruments.put(id, qty);
         }

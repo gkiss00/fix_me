@@ -36,7 +36,8 @@ USE fix_me;
 CREATE TABLE `clients` (
   `id` int NOT NULL,
   `type` int NOT NULL,
-  `pending` int
+  `pending` int,
+  `wallet`int
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 -- --------------------------------------------------------
@@ -111,7 +112,7 @@ ALTER TABLE `transactions`
   ADD PRIMARY KEY (`id`);
 
 --
--- Index pour la table `clients`
+-- Index pour la table `clientsinstruments`
 --
 ALTER TABLE `clientsinstruments`
   ADD PRIMARY KEY (`client_id`, `instrument_id`);

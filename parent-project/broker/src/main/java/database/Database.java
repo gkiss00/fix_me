@@ -20,32 +20,69 @@ public class Database{
 
     //*****************************************************************************************
     //*****************************************************************************************
+    //RESET
+    //*****************************************************************************************
+    //*****************************************************************************************
+
+    public void reset() throws Exception{
+        String request1 = "DELETE FROM clientsinstruments";
+        String request2 = "DELETE FROM transactions";
+        String request3 = "DELETE FROM clients";
+
+        Statement statement = connection.createStatement();
+        statement.executeUpdate(request1);
+        statement.executeUpdate(request2);
+        statement.executeUpdate(request3);
+    }
+
+    //*****************************************************************************************
+    //*****************************************************************************************
     //CLIENT
     //*****************************************************************************************
     //*****************************************************************************************
 
     public void insertClient(int client_id, int type) throws Exception{
-        String request = "INSERT INTO clients VALUES (" + ITOS(client_id) + ", " + ITOS(type) + ", 0)";
+        String request = "INSERT INTO clients VALUES (" + ITOS(client_id) + ", " + ITOS(type) + ", 0, 2000)";
 
         Statement statement = connection.createStatement();
         statement.executeUpdate(request);
     }
 
-    public void updateClient(int client_id, int pending) throws Exception{
+    public void updateClientPending(int client_id, int pending) throws Exception{
         String request = "UPDATE clients SET pending=" + ITOS(pending) + " WHERE id=" + ITOS(client_id);
 
         Statement statement = connection.createStatement();
         statement.executeUpdate(request);
     }
 
-    public ResultSet getMaxId() throws Exception{
+    public int getClientWallet(int client_id) throws Exception{
+        ResultSet res;
+        int wallet = 0;
+        String request = "SELECT wallet FROM clients WHERE id=" + ITOS(client_id);
+        Statement statement = connection.createStatement();
+        res = statement.executeQuery(request);
+        if (res.next())
+            System.out.println(res.getInt(1));
+        return (wallet);
+    }
+
+    public void updateClientWallet(int client_id, int wallet) throws Exception{
+        String request = "UPDATE clients SET wallet=" + ITOS(wallet) + " WHERE id=" + ITOS(client_id);
+
+        Statement statement = connection.createStatement();
+        statement.executeUpdate(request);
+    }
+
+    public int getMaxId() throws Exception{
+        int maxId = 0;
         ResultSet res;
         String request = "SELECT MAX(id) FROM clients";
 
         Statement statement = connection.createStatement();
         res = statement.executeQuery(request);
-        System.out.println(res);
-        return (res);
+        if (res.next())
+            maxId = res.getInt(1);
+        return (maxId);
     }
 
     //*****************************************************************************************
@@ -65,8 +102,7 @@ public class Database{
 
     public ResultSet getClientInstruments(int client_id) throws Exception{
         ResultSet res;
-        String request = "SELECT * FROM clientsinstruments where client_id = ";
-        request += ITOS(client_id);
+        String request = "SELECT * FROM clientsinstruments where client_id=" + ITOS(client_id);
 
         Statement statement = connection.createStatement();
         res = statement.executeQuery(request);

@@ -28,15 +28,27 @@ public class Broker {
     //***********************************************************************
 
     //SET STARTER INSTUMENTS
-    private static void setMyInstruments(Database db) throws Exception{
+    private static void setMyInstruments() throws Exception{
         Random rand = new Random();
         //Get all instruments
         all_instruments = DataToObject.getAllInstruments(db.getAllInstruments());
         //set my_instruments
         for (int i = 0; i < 5; ++i){
             int pos = rand.nextInt(all_instruments.size());
-            my_instruments.put(all_instruments.get(pos).getId(), rand.nextInt(3) + 1);
+            int qty = rand.nextInt(3) + 1;
+            my_instruments.put(all_instruments.get(pos).getId(), qty);
         }
+        //insert into db
+        Iterator<Map.Entry<Integer, Integer>> itr = my_instruments.entrySet().iterator();   
+        while(itr.hasNext()) 
+        { 
+            Map.Entry<Integer, Integer> entry = itr.next();
+            db.insertClientIntrument(Id, entry.getKey(), entry.getValue());
+        } 
+    }
+
+    private static void getMyInstruments() throws Exception{
+        my_instruments = DataToObject.getClientInstruments(db.getClientInstruments(Id));
     }
 
     //get price of an intrument -1 if doesn't exist
@@ -157,10 +169,13 @@ public class Broker {
             //get the instrument
             Integer instru = my_instruments.get(instruId);
             //update qty in inventory
-            if (instru == qty)
+            if (instru == qty){
                 my_instruments.remove(instruId);
-            else
+                db.removeClientIntrument(Id, instruId);
+            }else{
                 my_instruments.put(instruId, instru - qty);
+                db.updateClientIntrument(Id, instruId, instru - qty);
+            }
             //uodate wallet
             wallet += (qty * getPrice(instruId));
         //if buy Exeuted
@@ -168,14 +183,18 @@ public class Broker {
             //get the instrument
             Integer instru = my_instruments.get(instruId);
             //update qty in inventory
-            if (instru != null)
+            if (instru != null){
                 my_instruments.put(instruId, instru + qty);
-            else
+                db.updateClientIntrument(Id, instruId, instru + qty);
+            }else{
                 my_instruments.put(instruId, qty);
+                db.insertClientIntrument(Id, instruId, qty);
+            }
             //update wallet
             wallet -= (qty * getPrice(instruId));
         }
-        db.updateClient(Id, 0);
+        db.updateClientWallet(Id, wallet);
+        db.updateClientPending(Id, 0);
     }
 
     //***********************************************************************
@@ -201,7 +220,7 @@ public class Broker {
                 String fix_msg = Fix.stringToFix(args[0].toUpperCase(), Id, Integer.parseInt(args[1]), 
                                 Integer.parseInt(args[2]), Integer.parseInt(args[3]), getPrice(Integer.parseInt(args[2])));
                 //send fix to server
-                db.updateClient(Id, 1);
+                db.updateClientPending(Id, 1);
                 ps.println(fix_msg);
                 //recieve response
                 getResponse(args[0].toUpperCase(), args);
@@ -230,8 +249,12 @@ public class Broker {
         ps.println(desired_id);
         //get your id
         Id = Integer.parseInt(bf.readLine());
-        if (Id != desired_id)
+        if (Id != desired_id){
             db.insertClient(Id, 5000);
+            setMyInstruments();
+        }else{
+            getMyInstruments();
+        }
     }
 
     //***********************************************************************
@@ -243,8 +266,6 @@ public class Broker {
     public static void main(String[] args){
         System.out.println("Broker");
         try{
-            //set my starting stuff
-            setMyInstruments(db);
             //Connect to the router
             s = new Socket("localhost", 5000);
             bf = new BufferedReader(new InputStreamReader(s.getInputStream()));
