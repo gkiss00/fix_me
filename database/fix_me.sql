@@ -30,6 +30,17 @@ USE fix_me;
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `clients`
+--
+
+CREATE TABLE `clients` (
+  `id` int NOT NULL,
+  `type` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `instruments`
 --
 
@@ -63,9 +74,28 @@ CREATE TABLE `transactions` (
   `msg` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `clientsinstruments`
+--
+
+CREATE TABLE `clientsinstruments` (
+  `client_id` int NOT NULL,
+  `instrument_id` int NOT NULL,
+  `quantity` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+
 --
 -- Index pour les tables déchargées
 --
+
+--
+-- Index pour la table `clients`
+--
+ALTER TABLE `clients`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Index pour la table `instruments`
@@ -78,6 +108,12 @@ ALTER TABLE `instruments`
 --
 ALTER TABLE `transactions`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `clients`
+--
+ALTER TABLE `clientsinstruments`
+  ADD PRIMARY KEY (`client_id`, `instrument_id`);
 
 --
 -- AUTO_INCREMENT pour les tables déchargées

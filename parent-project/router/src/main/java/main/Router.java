@@ -14,6 +14,8 @@ public class Router{
     private static Database db = new Database();
     private static Map<Integer, Socket> routing_table = new HashMap<Integer, Socket>();
     private static Map<Integer, Integer> client_type = new HashMap<Integer, Integer>();
+    private static List<String> msg_pending = new ArrayList<String>();
+    private static List<Integer> diconnected_broker = new ArrayList<Integer>();
     private static ExecutorService executor_service = Executors.newFixedThreadPool(10);
     private static List<Server> server_list = new ArrayList<Server>();
 
@@ -49,10 +51,6 @@ public class Router{
         return (null);
     }
 
-    private static void advert(){
-        System.out.println("Client " + id + " connected");
-    }
-
     //***********************************************************************
     //***********************************************************************
     //START LISTENING FOR CONNECTION
@@ -64,7 +62,6 @@ public class Router{
 
         client_type.put(nextId, type);
         routing_table.put(nextId, socket);
-        advert();
     }
 
     //START LISTENING FOR ANY CHANGE
@@ -88,7 +85,7 @@ public class Router{
                 int nextId = getNextId();
                 register(sock, port, nextId);
                 //START A SERVER WITH THE SOCKET...
-                Server server = new Server(sock, routing_table, client_type, nextId, db);
+                Server server = new Server(sock, routing_table, client_type, msg_pending, diconnected_broker, nextId, db);
                 server_list.add(server);
                 executor_service.submit(server);
             }

@@ -105,7 +105,6 @@ public class Broker {
         //get price
         int price = getPrice(instrumentId);
 
-        
         //if u try to sell
         if(action.compareTo("SELL") == 0){
             //check if u get the instument in your inventory
@@ -186,8 +185,6 @@ public class Broker {
     private static void startFixing()throws Exception{
         Scanner scan = new Scanner(System.in);
         
-        //get your id
-        Id = Integer.parseInt(bf.readLine());
         //get some info
         System.out.println("Id : " + Id);
         System.out.println("Your stock : " + my_instruments);
@@ -214,6 +211,26 @@ public class Broker {
 
     //***********************************************************************
     //***********************************************************************
+    //CREATE BROKER
+    //***********************************************************************
+    //***********************************************************************
+
+    private static void askForId(String[] args) throws Exception{
+        int desired_id = -1;
+        if (args.length != 0){
+            try{
+                desired_id = Integer.parseInt(args[0]);
+            }catch(Exception e){
+                System.out.println("You must pass a valid id as argument");
+            }
+        }
+        ps.println(desired_id);
+        //get your id
+        Id = Integer.parseInt(bf.readLine());
+    }
+
+    //***********************************************************************
+    //***********************************************************************
     //START
     //***********************************************************************
     //***********************************************************************
@@ -229,7 +246,9 @@ public class Broker {
             s = new Socket("localhost", 5000);
             bf = new BufferedReader(new InputStreamReader(s.getInputStream()));
             ps = new PrintStream(s.getOutputStream());
-            //InetSocketAddress addr = new InetSocketAddress(InetAddress.getByName("localhost"), 5000);
+            //ask for his Id
+            askForId(args);
+            //start listening
             startFixing();
         }catch(Exception e){
             System.out.println("Exception : " + e.getMessage());
