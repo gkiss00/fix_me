@@ -11,6 +11,7 @@ import database.Database;
 
 public class Server implements Runnable{
     private int id;
+    private int type;
     private Socket s;
     private int port;
     private Map<Integer, Socket> routing_table;
@@ -29,6 +30,7 @@ public class Server implements Runnable{
         this.msg_pending = mp;
         this.diconnected_broker = dis;
         this.id = id;
+        this.type = client_type.get(id);
         this.db = db;
         try{
             bf = new BufferedReader(new InputStreamReader(s.getInputStream()));
@@ -106,17 +108,28 @@ public class Server implements Runnable{
                 }
                 //verify on checkSum;
                 if (Fix.validateCheckSum(msg) == true){
-                    //get the TargetSocket;
-                    Socket target = getTargetSocket(msg);
                     //insert into db
                     db.insertTransaction(msg);
-                    if (target != null && valideTarget(target)){
-                        //sendMessage;
-                        PrintStream tmp_ps = new PrintStream(target.getOutputStream());
-                        tmp_ps.println(msg);
+                    //if I am broker
+                    if(type == 5000){
+                        //if target exist and is market
+                        Socket target = getTargetSocket(msg);
+                        if (target != null && isTargetMarket(msg) == true){
+                            PrintStream tmp_ps = new PrintStream(target.getOutputStream());
+                            tmp_ps.println(msg);
+                        }else{
+                            System.out.println("Target not found");
+                            ps.println("NF");
+                        }
+                    //if I am market
                     }else{
-                        System.out.println("Target not found");
-                        ps.println("NF");
+                        Socket target = getTargetSocket(msg);
+                        if (target != null){
+                            PrintStream tmp_ps = new PrintStream(target.getOutputStream());
+                            tmp_ps.println(msg);
+                        }else{
+                            msg_pending.add(msg);
+                        }
                     }
                 }else{
                     System.out.println("Unvalide checksum");
@@ -149,8 +162,9 @@ public class Server implements Runnable{
         return (tmp);
     }
 
-    private boolean valideTarget(Socket target){
-        return (s.getPort() != target.getPort());
+    private boolean isTargetMarket(String msg){
+        int targetId = Integer.parseInt(Fix.getValueByTag(56, msg));
+        return (client_type.get(targetId) == 5001);
     }
 
     private void advert(){
