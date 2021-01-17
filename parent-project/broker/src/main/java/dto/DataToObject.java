@@ -3,6 +3,7 @@ package dto;
 import java.sql.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.*;
 
 import model.Instrument;
 
@@ -17,6 +18,16 @@ public class DataToObject {
             int price = res.getInt("price");
             Instrument instrument = new Instrument(id, name, price);
             instruments.add(instrument);
+        }
+        return (instruments);
+    }
+
+    public static Map<Integer, Integer> getClientInstruments(ResultSet res) throws Exception{
+        Map<Integer, Integer> instruments = new HashMap<Integer, Integer>();
+        while(res.next()){
+            int id = res.getInt("intrument_id");
+            int qty = res.getInt("quantity");
+            instruments.put(id, qty);
         }
         return (instruments);
     }
