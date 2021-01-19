@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.*;
 import java.io.*;
+import java.text.SimpleDateFormat;
 
 import utils.Fix;
 import database.Database;
@@ -21,6 +22,10 @@ public class Server implements Runnable{
     private Database db;
     private BufferedReader bf;
     private PrintStream ps;
+    public final String RED = "\033[0;31m";     // RED
+    public final String GREEN = "\033[0;32m";   // GREEN
+    public final String WHITE = "\033[0;37m";   // WHITE
+    private final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 
     public Server(Socket s, Map<Integer, Socket> rt, Map<Integer, Integer> ct, List<String> mp, List<Integer> dis, int id, Database db){
         this.s = s;
@@ -51,7 +56,6 @@ public class Server implements Runnable{
         for (int i = 0; i < msg_pending.size(); ++i){
             String tmp = msg_pending.get(i);
             int targetId = Integer.parseInt(Fix.getValueByTag(56, tmp));
-            System.out.println(targetId);
             if (targetId == id){
                 save = i;
                 ps.println(tmp);
@@ -89,11 +93,10 @@ public class Server implements Runnable{
         routing_table.remove(id);
         client_type.remove(id);
         if(type == 5000){
-            System.out.println("Added into disconnected broker");
             diconnected_broker.add(id);
         }
         s.close();
-        System.out.println("Client " + id + " disconnected");
+        System.out.println(RED + sdf.format(Calendar.getInstance().getTime()) + " Client " + id + " disconnected");
     }
 
     //LISTENING
@@ -107,7 +110,7 @@ public class Server implements Runnable{
             while(true){
                 //getMessage
                 String msg = bf.readLine();
-                System.out.println(msg);
+                System.out.println(WHITE + sdf.format(Calendar.getInstance().getTime()) + " " + msg);
                 //if the client is done return
                 if (msg == null){
                     disconectClient();
@@ -125,7 +128,7 @@ public class Server implements Runnable{
                             PrintStream tmp_ps = new PrintStream(target.getOutputStream());
                             tmp_ps.println(msg);
                         }else{
-                            System.out.println("Target not found");
+                            System.out.println(RED + sdf.format(Calendar.getInstance().getTime()) + " Target not found");
                             ps.println("NF");
                         }
                     //if I am market
@@ -139,7 +142,7 @@ public class Server implements Runnable{
                         }
                     }
                 }else{
-                    System.out.println("Unvalide checksum");
+                    System.out.println(RED + sdf.format(Calendar.getInstance().getTime()) + " Unvalide checksum");
                     ps.println("NF");
                 }
             }
@@ -175,6 +178,6 @@ public class Server implements Runnable{
     }
 
     private void advert(){
-        System.out.println("Client " + id + " connected");
+        System.out.println(GREEN + sdf.format(Calendar.getInstance().getTime()) + " Client " + id + " connected");
     }
 }
